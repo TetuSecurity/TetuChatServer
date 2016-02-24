@@ -15,4 +15,4 @@ build/Release
 node_modules
 *.pem
 
-server/src/config.json
+src/config.json
