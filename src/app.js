@@ -105,11 +105,6 @@ io.on('connection', function(socket){
     data.From = socketToUser[socket.id];
     io.to(recipient).emit('filetransfer', data);
   });
-  socket.on('sending', function(data){
-    console.log(data);
-    var recipient = userToSocket[data.To];
-    io.to(recipient).emit('sending', {From: socketToUser[socket.id]});
-  });
   socket.on('disconnect', function(){
     var username = socketToUser[socket.id];
     delete socketToUser[socket.id];
