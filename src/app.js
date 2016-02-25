@@ -7,12 +7,12 @@ var app = express();
 var PORT = 4321;
 
 if('SSL' in global.config){
-  var https = require('https');
+  var https = require('http2');
   var fs = require('fs');
   var config = {
     key: fs.readFileSync(global.config.SSL.keyfile),
-   cert: fs.readFileSync(global.config.SSL.certfile),
-   ca: fs.readFileSync(global.config.SSL.chainfile)
+    cert: fs.readFileSync(global.config.SSL.certfile),
+    ca: fs.readFileSync(global.config.SSL.chainfile)
   };
   var server = https.createServer(config, app);
   console.log('Using HTTPS!');
@@ -53,7 +53,7 @@ io.on('connection', function(socket){
       socketToUser[socket.id] = data.Username;
       userToSocket[data.Username] = socket.id;
       socket.broadcast.emit('friendsupdate');
-      return socket.emit('loginResponse', {Success:verified});
+      return socket.emit('loginResponse', {Success:verified, Username: data.Username});
     });
   });
   socket.on('register', function(data){
