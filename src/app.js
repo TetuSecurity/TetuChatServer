@@ -1,6 +1,6 @@
 var express = require('express');
 var socketio = require('socket.io');
-var RSA = require('node-rsa');
+var crypto = require('crypto');
 global.config = require('./config.json');
 var db = require('./middleware/db.js');
 var app = express();
@@ -36,9 +36,9 @@ function verifySignature(username, signature, callback){
     if(results.length<1){
       return callback('No Such Username');
     }
-    var key = new RSA();
-    key.importKey(results[0].PublicKey, 'public');
-    var verified = key.verify(username, signature);
+    var verify = crypto.createVerify('RSA-SHA512');
+    verify.update(username);
+    var verified = verify.verify(results[0].PublicKey, signature);
     return callback(null, verified, results[0].PublicKey);
   });
 }
