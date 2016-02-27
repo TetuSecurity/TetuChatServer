@@ -38,7 +38,7 @@ function verifySignature(username, signature, callback){
     }
     var verify = crypto.createVerify('RSA-SHA512');
     verify.update(username);
-    var verified = verify.verify(results[0].PublicKey, signature);
+    var verified = verify.verify(results[0].PublicKey, signature, 'hex');
     return callback(null, verified, results[0].PublicKey);
   });
 }
