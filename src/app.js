@@ -7,7 +7,7 @@ var app = express();
 var PORT = 4321;
 
 if('SSL' in global.config){
-  var https = require('http2');
+  var https = require('https');
   var fs = require('fs');
   var config = {
     key: fs.readFileSync(global.config.SSL.keyfile),
