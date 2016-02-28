@@ -44,6 +44,7 @@ function verifySignature(username, signature, callback){
 }
 
 app.get('/key/:username', function(req, res){
+  var username = req.params.username;
   console.log('getting key for', username);
   db.query('Select PublicKey from users where Username = ? LIMIT 1;', [username], function(err, results){
     if(err){
