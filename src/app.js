@@ -50,9 +50,11 @@ io.on('connection', function(socket){
       if(err){
         return socket.emit('loginResponse', {Success:false, Error:err});
       }
-      socketToUser[socket.id] = data.Username;
-      userToSocket[data.Username] = socket.id;
-      socket.broadcast.emit('friendsupdate');
+      if(verified){
+        socketToUser[socket.id] = data.Username;
+        userToSocket[data.Username] = socket.id;
+        socket.broadcast.emit('friendsupdate');
+      }
       return socket.emit('loginResponse', {Success:verified, Username: data.Username});
     });
   });
