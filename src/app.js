@@ -43,6 +43,19 @@ function verifySignature(username, signature, callback){
   });
 }
 
+app.get('/key/:username', function(req, res){
+  console.log('getting key for', username);
+  db.query('Select PublicKey from users where Username = ? LIMIT 1;', [username], function(err, results){
+    if(err){
+      return res.send({Success: false, Error: err});
+    }
+    if(results.length<1){
+      return res.send({Success: false, Error: 'No user by that username'});
+    }
+    return res.send({Success: true, Username: username, Key: results[0].PublicKey});
+  });
+});
+
 io.on('connection', function(socket){
   console.log('Client connected', socket.id);
   socket.on('login', function(data){
