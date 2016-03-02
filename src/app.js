@@ -45,7 +45,6 @@ function verifySignature(username, signature, callback){
 
 app.get('/key/:username', function(req, res){
   var username = req.params.username;
-  console.log('getting key for', username);
   db.query('Select PublicKey from users where Username = ? LIMIT 1;', [username], function(err, results){
     if(err){
       return res.send({Success: false, Error: err});
@@ -80,7 +79,7 @@ io.on('connection', function(socket){
       socketToUser[socket.id] = data.Username;
       userToSocket[data.Username] = socket.id;
       socket.broadcast.emit('friendsupdate');
-      return socket.emit('registerResponse', {Success:true});
+      return socket.emit('registerResponse', {Success:true, Username:data.Username});
     });
   });
   socket.on('getFriends', function(username){
