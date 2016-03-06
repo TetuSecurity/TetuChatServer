@@ -28,8 +28,8 @@ else{
 try{
   var keytext = fs.readFileSync(global.config.Key.Path);
   var decipher = crypto.createDecipher('aes256', global.config.Key.Password);
-  var dec = decipher.update(keytext, 'hex');
-  dec += decipher.final('hex');
+  var dec = decipher.update(keytext, 'hex', 'utf8');
+  dec += decipher.final('utf8');
   keys = JSON.parse(dec);
   var sign = crypto.createSign('RSA-SHA512');
   sign.update(keys.public);
