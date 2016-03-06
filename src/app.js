@@ -47,7 +47,7 @@ try{
     fs.writeFileSync(global.config.Key.Path, enc);
     var sign = crypto.createSign('RSA-SHA512');
     sign.update(keys.public);
-    var signatue = sign.sign(keys.private, 'hex');
+    var signature = sign.sign(keys.private, 'hex');
     handshakeData = {PublicKey: keys.public, Signature:signature};
   } else {
     throw e;
