@@ -46,7 +46,7 @@ try{
   }
 } finally{
   var sign = crypto.createSign('RSA-SHA512');
-  sign.update(PublicKey);
+  sign.update(keys.public);
   var signatue = sign.sign(keys.private, 'hex');
   handshakeData = {PublicKey: keys.public, Signature:signature};
 }
