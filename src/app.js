@@ -31,6 +31,10 @@ try{
   var dec = decipher.update(keytext, 'hex');
   dec += decipher.final('hex');
   keys = JSON.parse(dec);
+  var sign = crypto.createSign('RSA-SHA512');
+  sign.update(keys.public);
+  var signatue = sign.sign(keys.private, 'hex');
+  handshakeData = {PublicKey: keys.public, Signature:signature};
 } catch(e){
   if (e.code === 'ENOENT') {
     console.log('no keys found!\n Generating new keypair');
@@ -41,14 +45,13 @@ try{
     var enc = cipher.update(keytext, 'utf8', 'hex');
     enc += cipher.final('hex');
     fs.writeFileSync(global.config.Key.Path, enc);
+    var sign = crypto.createSign('RSA-SHA512');
+    sign.update(keys.public);
+    var signatue = sign.sign(keys.private, 'hex');
+    handshakeData = {PublicKey: keys.public, Signature:signature};
   } else {
     throw e;
   }
-} finally{
-  var sign = crypto.createSign('RSA-SHA512');
-  sign.update(keys.public);
-  var signatue = sign.sign(keys.private, 'hex');
-  handshakeData = {PublicKey: keys.public, Signature:signature};
 }
 
 var io = socketio(server);
