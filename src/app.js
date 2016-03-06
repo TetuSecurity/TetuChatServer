@@ -1,14 +1,16 @@
 var express = require('express');
 var socketio = require('socket.io');
 var crypto = require('crypto');
+var fs = require('fs');
 global.config = require('./config.json');
-var db = require('./middleware/db.js');
+var db = require('./middleware/db');
 var app = express();
 var PORT = 4321;
+var keys;
+var handshakeData;
 
 if('SSL' in global.config){
   var https = require('https');
-  var fs = require('fs');
   var config = {
     key: fs.readFileSync(global.config.SSL.keyfile),
     cert: fs.readFileSync(global.config.SSL.certfile),
@@ -21,8 +23,35 @@ else{
   var http = require('http');
   var server= http.Server(app);
 }
-var io = socketio(server);
 
+
+try{
+  var keytext = fs.readFileSync(global.config.Key.Path);
+  var decipher = crypto.createDecipher('aes256', global.config.Key.Password);
+  var dec = decipher.update(keytext, 'hex');
+  dec += decipher.final('hex');
+  keys = JSON.parse(dec);
+} catch(e){
+  if (e.code === 'ENOENT') {
+    console.log('no keys found!\n Generating new keypair');
+    var keypair = require('keypair');
+    keys = keypair({bits:4096});
+    var keytext = JSON.stringify(keys);
+    var cipher = crypto.createCipher('aes256', global.config.Key.Password);
+    var enc = cipher.update(keytext, 'utf8', 'hex');
+    enc += cipher.final('hex');
+    fs.writeFileSync(global.config.Key.Path, enc);
+  } else {
+    throw e;
+  }
+} finally{
+  var sign = crypto.createSign('RSA-SHA512');
+  sign.update(PublicKey);
+  var signatue = sign.sign(keys.private, 'hex');
+  handshakeData = {PublicKey: keys.public, Signature:signature};
+}
+
+var io = socketio(server);
 server.listen(PORT);
 console.log('Server started on port', PORT);
 var userToSocket = {};
@@ -58,7 +87,7 @@ app.get('/key/:username', function(req, res){
 
 io.on('connection', function(socket){
   console.log('Client connected', socket.id);
-  socket.emit('connected');
+  socket.emit('connected', handshakedata);
   socket.on('login', function(data){
     verifySignature(data.Username, data.Signature, function(err, verified, publickey){
       if(err){
