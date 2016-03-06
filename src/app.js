@@ -58,6 +58,7 @@ app.get('/key/:username', function(req, res){
 
 io.on('connection', function(socket){
   console.log('Client connected', socket.id);
+  socket.emit('connected');
   socket.on('login', function(data){
     verifySignature(data.Username, data.Signature, function(err, verified, publickey){
       if(err){
