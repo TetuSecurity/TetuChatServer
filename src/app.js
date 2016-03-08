@@ -6,8 +6,7 @@ global.config = require('./config.json');
 var db = require('./middleware/db');
 var app = express();
 var PORT = 4321;
-var keys;
-var handshakeData;
+
 
 if('SSL' in global.config){
   var https = require('https');
@@ -24,35 +23,6 @@ else{
   var server= http.Server(app);
 }
 
-
-try{
-  var keytext = fs.readFileSync(global.config.Key.Path);
-  var decipher = crypto.createDecipher('aes256', global.config.Key.Password);
-  var dec = decipher.update(keytext, 'hex', 'utf8');
-  dec += decipher.final('utf8');
-  keys = JSON.parse(dec);
-  var sign = crypto.createSign('RSA-SHA512');
-  sign.update(keys.public);
-  var signatue = sign.sign(keys.private, 'hex');
-  handshakeData = {PublicKey: keys.public, Signature:signature};
-} catch(e){
-  if (e.code === 'ENOENT') {
-    console.log('no keys found!\n Generating new keypair');
-    var keypair = require('keypair');
-    keys = keypair({bits:4096});
-    var keytext = JSON.stringify(keys);
-    var cipher = crypto.createCipher('aes256', global.config.Key.Password);
-    var enc = cipher.update(keytext, 'utf8', 'hex');
-    enc += cipher.final('hex');
-    fs.writeFileSync(global.config.Key.Path, enc);
-    var sign = crypto.createSign('RSA-SHA512');
-    sign.update(keys.public);
-    var signature = sign.sign(keys.private, 'hex');
-    handshakeData = {PublicKey: keys.public, Signature:signature};
-  } else {
-    throw e;
-  }
-}
 
 var io = socketio(server);
 server.listen(PORT);
@@ -90,7 +60,7 @@ app.get('/key/:username', function(req, res){
 
 io.on('connection', function(socket){
   console.log('Client connected', socket.id);
-  socket.emit('connected', handshakedata);
+  socket.emit('connected');
   socket.on('login', function(data){
     verifySignature(data.Username, data.Signature, function(err, verified, publickey){
       if(err){
